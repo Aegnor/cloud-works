@@ -6,7 +6,7 @@
           <q-input
             type="hidden"
             name="userToUpdate"
-            v-model="userEditId"
+            v-model="userToEditId"
           ></q-input>
         </div>
         <div class="field">
@@ -55,12 +55,12 @@
       >
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn dense round flat color="white" @click="editUser(props.row.id)" icon="edit"></q-btn>
+            <q-btn dense round flat color="white" @click="setUserFormDataByUserId(props.row.id)" icon="edit"></q-btn>
             <q-btn dense round flat color="white" @click="deleteUser(props.row.id)" icon="delete"></q-btn>
           </q-td>
         </template>
       </q-table>
-      <p v-else>No users rigth now</p>
+      <p v-else>No users right now</p>
     </div>
   </q-page>
 </template>
@@ -73,7 +73,7 @@ export default {
       name: '',
       surname: '',
       email: '',
-      userEditId: null,
+      userToEditId: null,
       usersTableColumns: [
         {
           name: 'name',
@@ -100,28 +100,23 @@ export default {
           align:'center'
         },
       ],
-      usersData: [{
-        name: 'name',
-        surname: 'surname',
-        email: 'email',
-        id: 1,
-      }]
+      usersData: this.$store.getters["userModule/user"]
     }
   },
   methods: {
     submit() {
       const {name, email, surname} = this
-      if (!name.trim() && !email.trim() && !surname.trim()) {
+      if (!name.trim() || !email.trim() || !surname.trim()) {
         return
       }
 
-      if (this.userEditId) {
-        const updateUser = this.findUserByID(this.userEditId)
-
-        updateUser.name = this.name
-        updateUser.email = this.email
-        updateUser.surname = this.surname
-        updateUser.id = this.userEditId
+      if (this.userToEditId) {
+        this.$store.dispatch('userModule/updateUser', {
+          name: this.name,
+          surname: this.surname,
+          email: this.email,
+          id: this.userToEditId
+        })
 
         this.resetUserForm()
         return
@@ -134,29 +129,24 @@ export default {
 
       this.resetUserForm()
 
-      this.usersData.push(newUser)
+      this.$store.dispatch('userModule/addUser', newUser)
     },
-    editUser(id) {
-      const user = this.findUserByID(id)
+    setUserFormDataByUserId(id) {
+      const user = this.$store.getters['userModule/findUserByID'](id)
 
       this.name = user.name
       this.email = user.email
       this.surname = user.surname
-      this.userEditId = user.id
+      this.userToEditId = user.id
     },
     deleteUser(id) {
-      const indexOfUser = this.usersData.findIndex(user => user.id === id)
-
-      this.usersData.splice(indexOfUser, 1)
-    },
-    findUserByID(id) {
-      return this.usersData.find(user => user.id === id)
+      this.$store.dispatch('userModule/deleteUser', id)
     },
     resetUserForm() {
       this.name = ''
       this.email = ''
       this.surname = ''
-      this.userEditId = null
+      this.userToEditId = null
     }
   }
 }
