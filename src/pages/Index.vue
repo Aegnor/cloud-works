@@ -1,8 +1,7 @@
 <template>
   <q-page class="flex flex-center">
     <div class="wrapper">
-
-      <form novalidate class="q-pb-md" @submit.prevent="submit()">
+      <form class="q-pb-md" @submit.prevent="submit()">
         <div class="hidden">
           <q-input
             type="hidden"
@@ -50,8 +49,8 @@
         :data="usersData"
         :columns="usersTableColumns"
         row-key="id"
-        dark
         color="amber"
+        dark
         hide-bottom
       >
         <template v-slot:body-cell-actions="props">
